@@ -1,0 +1,192 @@
+<!doctype html>
+<meta charset="utf-8">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+  integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+  integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+
+<link rel="stylesheet" href="../../static/style_custom.css">
+
+<title>Boyd Nguyen</title>
+
+<body>
+  <header class="container">
+    <h1 class="title">Boyd Nguyen</h1>
+    <nav class="container pb-4">
+      <ul class="nav justify-content-center nav-pills">
+        <li class="nav-item">
+          <a href="../../" 
+            class="nav-link">About</a>
+        </li>
+
+
+        <li class="dropdown nav-item">
+          
+          <a href="#"  class="active nav-link dropdown-toggle" 
+            class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Blog</a>
+          
+          <ul class="dropdown-menu">
+            <li><a href="../../topics/" class="dropdown-item">By topics</a></li>
+
+            <li><a href="../" class="dropdown-item">All posts</a></li>
+          </ul>
+          
+        </li>
+
+        <li class="nav-item">
+          <a href="../../book-notes/" 
+          class="nav-link">Book notes</a>
+        </li>
+
+      </ul>
+    </nav>
+  </header>
+  <div class="container">
+    
+  <h2>Working with factors in R (Part 1)</h2>
+  <p class="meta">
+  Monday, April 25, 2022
+  </p>
+  <div class="body"><p>Factors are R's way of dealing with categorical data - data points which fall into a finite number of categories. A few examples of categorical data are gender (male, female) and income bracket (low, middle, hight).</p>
+<p>Factors are quite useful as they offer additional functionalities compared to character type.</p>
+<p>We can use base R functions to work with factors, or take advantage of other R packages that are specifically developed for this purpose such as <code>forcats</code>.</p>
+<p>For the purpose of illustration I will use a <a href="https://www.kaggle.com/datasets/fedesoriano/heart-failure-prediction?resource=download&amp;select=heart.csv">small dataset</a> from Kaggle. This dataset contains the health information, including chest pain type, blood pressure, and cholesterol level, of 918 people.</p>
+<pre><code class="lang-r">&gt; data &lt;- read.csv(&quot;heart.csv&quot;,
+                 header = TRUE,
+                 encoding = &quot;utf-8&quot;)
+&gt; glimpse(data)
+
+Rows: 918
+Columns: 12
+$ Age            &lt;int&gt; 40, 49, 37, 48, 54, 39, 45, 54, 37, 48, 37, 58, 39, 49, 42, 54, 38, 43, 60, 36, 43, 44, 49, 44, 40, 36, 53, 52…
+$ Sex            &lt;chr&gt; &quot;M&quot;, &quot;F&quot;, &quot;M&quot;, &quot;F&quot;, &quot;M&quot;, &quot;M&quot;, &quot;F&quot;, &quot;M&quot;, &quot;M&quot;, &quot;F&quot;, &quot;F&quot;, &quot;M&quot;, &quot;M&quot;, &quot;M&quot;, &quot;F&quot;, &quot;F&quot;, &quot;M&quot;, &quot;F&quot;, &quot;M&quot;, &quot;M&quot;, &quot;F&quot;, &quot;M&quot;, …
+$ ChestPainType  &lt;chr&gt; &quot;ATA&quot;, &quot;NAP&quot;, &quot;ATA&quot;, &quot;ASY&quot;, &quot;NAP&quot;, &quot;NAP&quot;, &quot;ATA&quot;, &quot;ATA&quot;, &quot;ASY&quot;, &quot;ATA&quot;, &quot;NAP&quot;, &quot;ATA&quot;, &quot;ATA&quot;, &quot;ASY&quot;, &quot;NAP&quot;, &quot;ATA&quot;…
+$ RestingBP      &lt;int&gt; 140, 160, 130, 138, 150, 120, 130, 110, 140, 120, 130, 136, 120, 140, 115, 120, 110, 120, 100, 120, 100, 120, …
+$ Cholesterol    &lt;int&gt; 289, 180, 283, 214, 195, 339, 237, 208, 207, 284, 211, 164, 204, 234, 211, 273, 196, 201, 248, 267, 223, 184, …
+$ FastingBS      &lt;int&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,…
+$ RestingECG     &lt;chr&gt; &quot;Normal&quot;, &quot;Normal&quot;, &quot;ST&quot;, &quot;Normal&quot;, &quot;Normal&quot;, &quot;Normal&quot;, &quot;Normal&quot;, &quot;Normal&quot;, &quot;Normal&quot;, &quot;Normal&quot;, &quot;Normal&quot;, &quot;ST&quot;…
+$ MaxHR          &lt;int&gt; 172, 156, 98, 108, 122, 170, 170, 142, 130, 120, 142, 99, 145, 140, 137, 150, 166, 165, 125, 160, 142, 142, 16…
+$ ExerciseAngina &lt;chr&gt; &quot;N&quot;, &quot;N&quot;, &quot;N&quot;, &quot;Y&quot;, &quot;N&quot;, &quot;N&quot;, &quot;N&quot;, &quot;N&quot;, &quot;Y&quot;, &quot;N&quot;, &quot;N&quot;, &quot;Y&quot;, &quot;N&quot;, &quot;Y&quot;, &quot;N&quot;, &quot;N&quot;, &quot;N&quot;, &quot;N&quot;, &quot;N&quot;, &quot;N&quot;, &quot;N&quot;, &quot;N&quot;, …
+$ Oldpeak        &lt;dbl&gt; 0.0, 1.0, 0.0, 1.5, 0.0, 0.0, 0.0, 0.0, 1.5, 0.0, 0.0, 2.0, 0.0, 1.0, 0.0, 1.5, 0.0, 0.0, 1.0, 3.0, 0.0, 1.0, …
+$ ST_Slope       &lt;chr&gt; &quot;Up&quot;, &quot;Flat&quot;, &quot;Up&quot;, &quot;Flat&quot;, &quot;Up&quot;, &quot;Up&quot;, &quot;Up&quot;, &quot;Up&quot;, &quot;Flat&quot;, &quot;Up&quot;, &quot;Up&quot;, &quot;Flat&quot;, &quot;Up&quot;, &quot;Flat&quot;, &quot;Up&quot;, &quot;Flat&quot;, &quot;F…
+$ HeartDisease   &lt;int&gt; 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 1,…
+</code></pre>
+<h3 id="converting-variables-to-factor">Converting variables to factor</h3><h4 id="converting-one-variable">Converting one variable</h4><p>A quick look shows that the <code>Sex</code> variable can be coded as a factor. The cleanest way to do that is to combine the base R <code>as.factor()</code> function with the <code>%&lt;&gt;%</code> assignment pipe from the <code>magrittr</code> package.</p>
+<pre><code class="lang-r">library(magrittr)
+
+data$Sex %&lt;&gt;% as.factor()
+</code></pre>
+<p>The assignment pipe essentially runs the code to the right of the expression and assigns the result back to the variable in the left.</p>
+<h4 id="converting-multiple-variables">Converting multiple variables</h4><p>Categories are quite common in datasets. If we look at the <code>heart</code> dataset, all of the other character-type columns in fact should also be dealt with as factors. We can confirm this by checking the number of unique values for each variable.</p>
+<pre><code class="lang-r"># define a custom function that counts the number of unique values in a column
+
+count_unique &lt;- function(x) {
+  return (length(unique(x)))
+}
+
+# get the name of all the character columns in the dataset and assign it to a variable
+data %&gt;% sapply(is.character) %&gt;%
+         which() %&gt;%
+         names() -&gt;
+char_var
+
+# count the unique values of each column
+data[char_var] %&gt;% sapply(count_unique)
+</code></pre>
+<p>This is our result:</p>
+<pre><code>ChestPainType     RestingECG ExerciseAngina       ST_Slope
+             4              3              2              3
+</code></pre>
+<p>Each variable contains very few number of values, or categories, hence they can all be treated as factors. Instead of doing the conversion column by column, there are faster ways this can be achieved with either base R functions, or with <code>dplyr</code>.</p>
+<h5 id="base-r-lapply">Base R: lapply</h5><p>We can use <code>lapply</code> to loop through each column of a given dataframe and convert it to factor using <code>as.factor</code>.</p>
+<pre><code class="lang-r">data[char_var] %&lt;&gt;%
+  lapply(as.factor) %&gt;%
+  data.frame()
+</code></pre>
+<p><code>lapply</code> returns a list of columns, which is then converted back to a dataframe. I noted one interesting point here. We can convert multiple columns to other types such as numeric or character using a simple <code>sapply(as.numeric)</code> or <code>sapply(as.character)</code> function. With factors, however, 2 steps are involved, and <code>lapply</code> is used instead of <code>sapply</code>.</p>
+<p>The reason for this is that factor is a special type that cannot be contained in a matrix or array. <code>sapply</code> by default returns either an atomic vector, matrix, or an array. These types can store logical, integer, real, complex, string/character, and raw; but not factor. <code>lapply</code> returns a list, which can store objects of any type, hence retains the factor type without reducing it to character.</p>
+<h5 id="dplyr"><code>dplyr</code></h5><p>An even neater way of converting multiple columns to factor is using <code>dplyr::across()</code> function.</p>
+<pre><code class="lang-r">data[char_var] %&lt;&gt;% mutate(across(everything(), as.factor))
+</code></pre>
+<p>The <code>mutate</code> function changes the columns within the dataframe, whereas the <code>across</code> function takes in a list of columns, and loops a provided function through each of them. The double pipe then reassigns the results back to the dataframe.</p>
+<h3 id="get-counts-of-each-category">Get counts of each category</h3><p>With factor variables, a common descriptive statistic is the count of each category. In R, you can get the counts of one column, counts of multiple columns, and cross-tab counts of multiple columns.</p>
+<h4 id="counts-of-one-or-multiple-columns">Counts of one or multiple columns</h4><p>The function to get the counts of factor variables is <code>table()</code>, and there are many ways to use it in a workflow.</p>
+<pre><code class="lang-r"># Method 1
+data %&gt;% select(ChestPainType) %&gt;% table()
+
+# Method 2
+data %&gt;% with(., table(ChestPainType))
+
+# results:
+ChestPainType
+ASY ATA NAP  TA 
+496 173 203  46
+</code></pre>
+<p>Both methods return the counts of each category within <code>ChestPainType</code> column. The <code>with</code> function specifies the dataframe <code>data</code> as the environment from which the <code>ChestPainType</code> column is drawn from. If you just run <code>data %&gt;% table(ChestPainType)</code>, you will get an error that <code>ChestPainType</code> variable does not exist.</p>
+<p>You can also get counts of multiple columns by using <code>sapply</code> to loop the <code>table</code> function through all selected columns.</p>
+<pre><code class="lang-r">data[char_var] %&gt;% sapply(table)
+
+# results:
+$ChestPainType
+
+ASY ATA NAP  TA 
+496 173 203  46 
+
+$RestingECG
+
+   LVH Normal     ST 
+   188    552    178 
+
+$ExerciseAngina
+
+  N   Y 
+547 371 
+
+$ST_Slope
+
+Down Flat   Up 
+  63  460  395
+</code></pre>
+<h4 id="get-cross-tab-frequencies">Get cross-tab frequencies</h4><p>By passing 2 columns in the <code>table</code> function, you'll get a cross tabulation of those two columns.</p>
+<pre><code class="lang-r">data %&gt;% with(table(ChestPainType,ExerciseAngina))
+
+# results:
+             ExerciseAngina
+ChestPainType   N   Y
+          ASY 199 297
+          ATA 156  17
+          NAP 152  51
+          TA   40   6
+</code></pre>
+<h4 id="get-counts-as-proportion">Get counts as proportion</h4><p>If you want to get the proportion instead of raw counts, you can use the <code>prop.table()</code> function.</p>
+<pre><code class="lang-r">data %&gt;% with(., table(ChestPainType)) %&gt;% prop.table()
+
+# results:
+ChestPainType
+       ASY        ATA        NAP         TA
+0.54030501 0.18845316 0.22113290 0.05010893
+</code></pre>
+</div>
+  <br>
+
+  <hr>
+  <p class="other-from-topic"> Other blogs from topic <em>R</em>: </p>
+
+  
+  <ul class="resources">
+  
+  
+  
+  </ul>
+
+
+
+  </div>
+  
+  <div class="container footer">
+    <footer>
+      &copy; Copyright 2022 by Boyd Nguyen.
+    </footer>
+</div>
+</body>
